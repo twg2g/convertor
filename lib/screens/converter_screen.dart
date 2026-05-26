@@ -182,7 +182,7 @@ class _ConverterScreenState extends State<ConverterScreen> {
             children: [
               Expanded(
                 child: DropdownButtonFormField<String>(
-                  value: _fromId,
+                  initialValue: _fromId,
                   decoration: const InputDecoration(labelText: 'From'),
                   items: [for (final u in units) DropdownMenuItem(value: u.id, child: Text('${u.name} (${u.symbol})'))],
                   onChanged: (v) {
@@ -195,7 +195,7 @@ class _ConverterScreenState extends State<ConverterScreen> {
               IconButton(onPressed: _swap, icon: const Icon(Icons.swap_vert)),
               Expanded(
                 child: DropdownButtonFormField<String>(
-                  value: _toId,
+                  initialValue: _toId,
                   decoration: const InputDecoration(labelText: 'To'),
                   items: [for (final u in units) DropdownMenuItem(value: u.id, child: Text('${u.name} (${u.symbol})'))],
                   onChanged: (v) {
