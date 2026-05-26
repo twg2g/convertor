@@ -167,9 +167,7 @@ class _ConverterScreenState extends State<ConverterScreen> {
         children: [
           if (cat.kind == ConversionCategoryKind.currency) ...[
             if (app.ratesRefreshing) const LinearProgressIndicator(minHeight: 3),
-            if (app.currencyRates.lastFetchedAt != null)
-              Text('Rates updated: ${app.currencyRates.lastFetchedAt!.toLocal()}',
-                  style: Theme.of(context).textTheme.bodySmall),
+            _CurrencyStatusBanner(app: app),
             const SizedBox(height: 12),
           ],
           TextField(
@@ -218,6 +216,73 @@ class _ConverterScreenState extends State<ConverterScreen> {
           ),
           if (_result != null && toUnit != null) Text(toUnit.symbol),
         ],
+      ),
+    );
+  }
+}
+
+/// Shows currency rate status with visual indicators for online/offline state
+class _CurrencyStatusBanner extends StatelessWidget {
+  const _CurrencyStatusBanner({required this.app});
+
+  final AppState app;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isOffline = !app.isOnline;
+    final isUsingFallback = app.isUsingFallbackRates;
+    final isStale = app.ratesAreStale;
+
+    Color backgroundColor;
+    Color textColor;
+    IconData icon;
+    String message;
+
+    if (isOffline && isUsingFallback) {
+      backgroundColor = theme.colorScheme.errorContainer;
+      textColor = theme.colorScheme.onErrorContainer;
+      icon = Icons.cloud_off;
+      message = 'Offline - Using approximate rates';
+    } else if (isOffline) {
+      backgroundColor = theme.colorScheme.secondaryContainer;
+      textColor = theme.colorScheme.onSecondaryContainer;
+      icon = Icons.cloud_off;
+      message = 'Offline - ${app.ratesCacheAgeDescription}';
+    } else if (isStale) {
+      backgroundColor = theme.colorScheme.tertiaryContainer;
+      textColor = theme.colorScheme.onTertiaryContainer;
+      icon = Icons.update;
+      message = '${app.ratesCacheAgeDescription} - Tap to refresh';
+    } else {
+      backgroundColor = theme.colorScheme.primaryContainer;
+      textColor = theme.colorScheme.onPrimaryContainer;
+      icon = Icons.cloud_done;
+      message = app.ratesCacheAgeDescription;
+    }
+
+    return GestureDetector(
+      onTap: app.ratesRefreshing ? null : () => app.refreshCurrencyRates(),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 18, color: textColor),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                message,
+                style: theme.textTheme.bodySmall?.copyWith(color: textColor),
+              ),
+            ),
+            if (!app.ratesRefreshing && (isOffline || isStale))
+              Icon(Icons.refresh, size: 16, color: textColor),
+          ],
+        ),
       ),
     );
   }

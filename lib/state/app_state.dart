@@ -26,6 +26,12 @@ class AppState extends ChangeNotifier {
   List<RecentConversion> get recents => List.unmodifiable(_recents);
   bool get ratesRefreshing => _ratesRefreshing;
   String? get ratesError => _ratesError;
+  
+  // Currency rate status getters
+  bool get isUsingFallbackRates => currencyRates.isUsingFallback;
+  bool get isOnline => currencyRates.isOnline;
+  bool get ratesAreStale => currencyRates.isStale;
+  String get ratesCacheAgeDescription => currencyRates.cacheAgeDescription;
 
   Future<void> bootstrap() async {
     _themeMode = await preferences.getThemeMode();
